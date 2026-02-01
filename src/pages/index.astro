@@ -6,8 +6,11 @@ import DraggableServices from '../components/DraggableServices.svelte';
 import DockerContainers from '../components/DockerContainers.svelte';
 import CloudflareMetrics from '../components/CloudflareMetrics.svelte';
 import Speedtest from '../components/Speedtest.svelte';
+import TopProcesses from '../components/TopProcesses.svelte';
 import Toast from '../components/Toast.svelte';
 import CommandPalette from '../components/CommandPalette.svelte';
+import QuickNotes from '../components/QuickNotes.svelte';
+import Uptime from '../components/Uptime.svelte';
 import { services, QUICK_ACCESS_COUNT } from '../config/services';
 
 const quickAccess = services.slice(0, QUICK_ACCESS_COUNT);
@@ -17,6 +20,7 @@ const otherServices = services.slice(QUICK_ACCESS_COUNT);
 <Layout title="Lau's Server">
   <Toast client:load />
   <CommandPalette services={services} client:load />
+  <QuickNotes client:load />
 
   <div class="min-h-screen p-4 md:p-8">
     <div class="max-w-7xl mx-auto space-y-6">
@@ -24,7 +28,11 @@ const otherServices = services.slice(QUICK_ACCESS_COUNT);
         <h1 class="text-3xl md:text-4xl font-bold text-gradient mb-2">
           Lau's Server
         </h1>
-        <p class="text-gray-500 text-sm">Dashboard</p>
+        <div class="flex items-center justify-center gap-2">
+          <p class="text-gray-500 text-sm">Dashboard</p>
+          <span class="text-gray-600">·</span>
+          <Uptime client:load />
+        </div>
       </header>
 
       <section>
@@ -45,6 +53,8 @@ const otherServices = services.slice(QUICK_ACCESS_COUNT);
             </h2>
             <DraggableServices services={quickAccess} storageKey="quick-services-order" client:load />
           </div>
+
+          <TopProcesses client:load />
         </div>
 
         <div class="lg:col-span-1 space-y-6">

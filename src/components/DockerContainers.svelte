@@ -50,6 +50,27 @@
     }
   }
 
+  async function recreateContainer(id: string, name: string) {
+    if (!confirm(`Recrear ${name}?\n\nEsto hará pull de la imagen y eliminará el contenedor.\nDeberás recrearlo via docker-compose o Portainer.`)) return;
+
+    actionLoading = id;
+    try {
+      const res = await fetch('/api/docker/recreate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      await fetchContainers();
+      (window as any).toast?.success(`Imagen actualizada. Recrea el contenedor.`);
+    } catch (e: any) {
+      (window as any).toast?.error(e.message || 'Error al recrear');
+    } finally {
+      actionLoading = null;
+    }
+  }
+
   function openLogs(container: Container) {
     logsModal = { isOpen: true, containerName: container.name, containerId: container.id };
   }
@@ -155,6 +176,16 @@
           </button>
           <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             {#if container.state === 'running'}
+              <button
+                onclick={() => recreateContainer(container.id, container.name)}
+                disabled={actionLoading === container.id}
+                class="p-1.5 rounded-md bg-accent-purple/20 text-accent-purple hover:bg-accent-purple/30 transition-colors disabled:opacity-50"
+                title="Recreate (pull + remove)"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+              </button>
               <button
                 onclick={() => containerAction(container.id, 'restart')}
                 disabled={actionLoading === container.id}
