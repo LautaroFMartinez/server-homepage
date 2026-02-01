@@ -10,7 +10,7 @@
   const timeZones: TimeZone[] = [
     { name: 'Argentina', zone: 'America/Argentina/Buenos_Aires', flag: 'AR' },
     { name: 'Galapagos', zone: 'Pacific/Galapagos', flag: 'EC' },
-    { name: 'Barcelona', zone: 'Europe/Barcelona', flag: 'ES' }
+    { name: 'Barcelona', zone: 'Europe/Madrid', flag: 'ES' }
   ];
 
   let times = $state<{ time: string; date: string }[]>(
