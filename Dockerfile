@@ -12,8 +12,9 @@ FROM node:22-alpine AS runtime
 
 WORKDIR /app
 
-# Install docker CLI to communicate with host docker
-RUN apk add --no-cache docker-cli
+RUN apk add --no-cache docker-cli curl && \
+    curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.alpine.sh | sh && \
+    apk add --no-cache speedtest
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules

@@ -2,9 +2,12 @@
 import Layout from '../layouts/Layout.astro';
 import Clock from '../components/Clock.svelte';
 import SystemMetrics from '../components/SystemMetrics.svelte';
-import ServiceCard from '../components/ServiceCard.svelte';
+import DraggableServices from '../components/DraggableServices.svelte';
 import DockerContainers from '../components/DockerContainers.svelte';
 import CloudflareMetrics from '../components/CloudflareMetrics.svelte';
+import Speedtest from '../components/Speedtest.svelte';
+import Toast from '../components/Toast.svelte';
+import CommandPalette from '../components/CommandPalette.svelte';
 import { services, QUICK_ACCESS_COUNT } from '../config/services';
 
 const quickAccess = services.slice(0, QUICK_ACCESS_COUNT);
@@ -12,6 +15,9 @@ const otherServices = services.slice(QUICK_ACCESS_COUNT);
 ---
 
 <Layout title="Lau's Server">
+  <Toast client:load />
+  <CommandPalette services={services} client:load />
+
   <div class="min-h-screen p-4 md:p-8">
     <div class="max-w-7xl mx-auto space-y-6">
       <header class="text-center py-4">
@@ -35,24 +41,15 @@ const otherServices = services.slice(QUICK_ACCESS_COUNT);
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               Acceso Rapido
+              <span class="text-xs text-gray-500 font-normal ml-auto">drag to reorder</span>
             </h2>
-            <div class="space-y-3">
-              {quickAccess.map(service => (
-                <ServiceCard
-                  name={service.name}
-                  url={service.url}
-                  icon={service.icon}
-                  color={service.color}
-                  description={service.description}
-                  client:load
-                />
-              ))}
-            </div>
+            <DraggableServices services={quickAccess} storageKey="quick-services-order" client:load />
           </div>
         </div>
 
-        <div class="lg:col-span-1">
+        <div class="lg:col-span-1 space-y-6">
           <DockerContainers client:load />
+          <Speedtest client:load />
         </div>
 
         <div class="space-y-6">
@@ -62,19 +59,9 @@ const otherServices = services.slice(QUICK_ACCESS_COUNT);
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
               </svg>
               Servicios
+              <span class="text-xs text-gray-500 font-normal ml-auto">drag to reorder</span>
             </h2>
-            <div class="space-y-3">
-              {otherServices.map(service => (
-                <ServiceCard
-                  name={service.name}
-                  url={service.url}
-                  icon={service.icon}
-                  color={service.color}
-                  description={service.description}
-                  client:load
-                />
-              ))}
-            </div>
+            <DraggableServices services={otherServices} storageKey="other-services-order" client:load />
           </div>
 
           <CloudflareMetrics client:load />

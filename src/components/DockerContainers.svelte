@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import LogsModal from './LogsModal.svelte';
 
   interface Container {
     id: string;
@@ -16,13 +17,15 @@
   let filter = $state<'all' | 'running' | 'stopped'>('all');
   let searchQuery = $state('');
 
+  let logsModal = $state({ isOpen: false, containerName: '', containerId: '' });
+
   async function fetchContainers() {
     try {
       const res = await fetch('/api/docker');
       if (!res.ok) throw new Error('Failed to fetch');
       containers = await res.json();
       error = null;
-    } catch (e) {
+    } catch {
       error = 'Error al cargar contenedores';
     } finally {
       loading = false;
@@ -39,11 +42,16 @@
       });
       if (!res.ok) throw new Error('Action failed');
       await fetchContainers();
-    } catch (e) {
-      error = `Error al ${action} contenedor`;
+      (window as any).toast?.success(`Contenedor ${action === 'start' ? 'iniciado' : action === 'stop' ? 'detenido' : 'reiniciado'}`);
+    } catch {
+      (window as any).toast?.error(`Error al ${action} contenedor`);
     } finally {
       actionLoading = null;
     }
+  }
+
+  function openLogs(container: Container) {
+    logsModal = { isOpen: true, containerName: container.name, containerId: container.id };
   }
 
   onMount(() => {
@@ -70,6 +78,13 @@
   });
 </script>
 
+<LogsModal
+  isOpen={logsModal.isOpen}
+  containerName={logsModal.containerName}
+  containerId={logsModal.containerId}
+  onClose={() => logsModal = { ...logsModal, isOpen: false }}
+/>
+
 <div class="glass rounded-xl p-6">
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
     <h2 class="text-lg font-semibold flex items-center gap-2">
@@ -84,7 +99,6 @@
     </div>
   </div>
 
-  <!-- Search and Filter -->
   <div class="flex flex-col sm:flex-row gap-3 mb-4">
     <div class="relative flex-1">
       <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,13 +143,16 @@
     <div class="space-y-2 max-h-96 overflow-y-auto scrollbar-thin pr-1">
       {#each filteredContainers as container (container.id)}
         <div class="flex items-center justify-between p-3 bg-dark-700/50 rounded-lg group hover:bg-dark-600/50 transition-colors">
-          <div class="flex items-center gap-3 min-w-0 flex-1">
+          <button
+            onclick={() => openLogs(container)}
+            class="flex items-center gap-3 min-w-0 flex-1 text-left"
+          >
             <div class="w-2 h-2 rounded-full flex-shrink-0 {container.state === 'running' ? 'bg-accent-green animate-pulse-slow' : 'bg-accent-red'}"></div>
             <div class="min-w-0 flex-1">
-              <div class="font-medium text-sm truncate">{container.name}</div>
+              <div class="font-medium text-sm truncate hover:text-accent-cyan transition-colors">{container.name}</div>
               <div class="text-xs text-gray-500 truncate">{container.image}</div>
             </div>
-          </div>
+          </button>
           <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             {#if container.state === 'running'}
               <button

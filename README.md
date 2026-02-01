@@ -6,18 +6,22 @@ Personal server dashboard built with Astro, Svelte 5, and TailwindCSS 4.
 
 ## Features
 
-- Multi-timezone clocks (Argentina, Galapagos, Madrid)
-- Real-time system metrics (CPU, RAM, Disk)
-- Configurable service links with quick access section
-- Docker container management (start/stop/restart)
-- Cloudflare analytics integration (requests, bandwidth, visitors, threats)
+- **Multi-timezone clocks** - Argentina, Galapagos, Madrid
+- **Real-time system metrics** - CPU, RAM, Disk, Temperature, Network I/O
+- **Metrics history** - Visual graph of CPU/RAM over time
+- **Docker container management** - Start/stop/restart with live logs viewer
+- **Speedtest** - On-demand internet speed test (Ookla)
+- **Cloudflare analytics** - Requests, bandwidth, visitors, threats
+- **Configurable services** - Drag & drop reordering with localStorage persistence
+- **Global search** - Quick access with `Ctrl+K` keyboard shortcut
+- **Toast notifications** - Visual feedback for actions
 
 ## Quick Start with Docker
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/homepage.git
-cd homepage
+git clone https://github.com/LautaroFMartinez/server-homepage.git
+cd server-homepage
 
 # Copy and configure environment
 cp .env.example .env
@@ -43,7 +47,16 @@ Edit `src/config/services.ts` to add your services:
 }
 ```
 
-The first 3 services appear in the "Quick Access" section.
+The first 3 services appear in the "Quick Access" section. Both sections support drag & drop reordering.
+
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+K` | Open global search |
+| `↑` `↓` | Navigate search results |
+| `Enter` | Select item |
+| `Esc` | Close modal/search |
 
 ## Rebuild Container
 
@@ -84,37 +97,47 @@ npm run dev
 ```
 src/
   config/
-    services.ts           # Services configuration
+    services.ts              # Services configuration
   components/
-    Clock.svelte          # Timezone clocks
-    SystemMetrics.svelte  # CPU, RAM, Disk metrics
-    ServiceCard.svelte    # Service link card
-    DockerContainers.svelte
-    CloudflareMetrics.svelte
+    Clock.svelte             # Timezone clocks
+    SystemMetrics.svelte     # CPU, RAM, Disk, Temp, Network
+    ServiceCard.svelte       # Service link card
+    DraggableServices.svelte # Drag & drop service list
+    DockerContainers.svelte  # Container list with actions
+    LogsModal.svelte         # Container logs viewer
+    CloudflareMetrics.svelte # Cloudflare stats
+    Speedtest.svelte         # Internet speed test
+    CommandPalette.svelte    # Global search (Ctrl+K)
+    Toast.svelte             # Notification system
   pages/
     api/
-      system.ts           # System metrics API
-      docker.ts           # List containers API
-      docker/[action].ts  # Container actions API
-      cloudflare.ts       # Cloudflare API
-    index.astro           # Main page
+      system.ts              # System metrics API
+      docker.ts              # List containers API
+      docker/[action].ts     # Container actions API
+      docker/logs.ts         # Container logs API
+      cloudflare.ts          # Cloudflare API
+      speedtest.ts           # Speedtest API
+    index.astro              # Main page
 ```
 
 ## Docker Requirements
 
-The container needs access to the Docker socket to list/control containers:
+The container needs access to:
 
 ```yaml
 volumes:
-  - /var/run/docker.sock:/var/run/docker.sock:ro
+  - /var/run/docker.sock:/var/run/docker.sock:ro  # Docker control
+  - /proc:/host/proc:ro                            # System metrics
+  - /sys:/host/sys:ro                              # CPU temperature
 ```
 
 ## Tech Stack
 
 - [Astro](https://astro.build/) - Web framework
-- [Svelte 5](https://svelte.dev/) - UI components
+- [Svelte 5](https://svelte.dev/) - UI components with runes
 - [TailwindCSS 4](https://tailwindcss.com/) - Styling
 - [TypeScript](https://www.typescriptlang.org/) - Type safety
+- [Ookla Speedtest](https://www.speedtest.net/apps/cli) - Speed testing
 
 ## License
 
