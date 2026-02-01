@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
-import { execSync } from 'child_process';
+import * as fs from 'fs';
+
+const PROC_PATH = fs.existsSync('/host/proc') ? '/host/proc' : '/proc';
 
 interface Process {
   pid: string;
@@ -8,26 +10,83 @@ interface Process {
   mem: number;
 }
 
+function getProcesses(): Process[] {
+  try {
+    const memTotal = getMemTotal();
+    const cpuCount = getCpuCount();
+    const uptime = getUptime();
+
+    const pids = fs.readdirSync(PROC_PATH).filter(f => /^\d+$/.test(f));
+    const processes: Process[] = [];
+
+    for (const pid of pids) {
+      try {
+        const stat = fs.readFileSync(`${PROC_PATH}/${pid}/stat`, 'utf8');
+        const statParts = stat.split(' ');
+
+        const comm = statParts[1].replace(/[()]/g, '');
+        const utime = parseInt(statParts[13]) || 0;
+        const stime = parseInt(statParts[14]) || 0;
+        const starttime = parseInt(statParts[21]) || 0;
+
+        const statm = fs.readFileSync(`${PROC_PATH}/${pid}/statm`, 'utf8');
+        const rss = parseInt(statm.split(' ')[1]) || 0;
+        const memBytes = rss * 4096;
+
+        const totalTime = utime + stime;
+        const seconds = uptime - (starttime / 100);
+        const cpuPercent = seconds > 0 ? ((totalTime / 100) / seconds) * 100 * cpuCount : 0;
+        const memPercent = memTotal > 0 ? (memBytes / memTotal) * 100 : 0;
+
+        if (comm && !['kworker', 'migration', 'rcu_', 'ksoftirqd'].some(k => comm.startsWith(k))) {
+          processes.push({
+            pid,
+            name: comm.substring(0, 20),
+            cpu: Math.min(cpuPercent, 100),
+            mem: memPercent
+          });
+        }
+      } catch {}
+    }
+
+    return processes
+      .sort((a, b) => b.cpu - a.cpu)
+      .slice(0, 5);
+  } catch {
+    return [];
+  }
+}
+
+function getMemTotal(): number {
+  try {
+    const meminfo = fs.readFileSync(`${PROC_PATH}/meminfo`, 'utf8');
+    const match = meminfo.match(/MemTotal:\s+(\d+)/);
+    return match ? parseInt(match[1]) * 1024 : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function getCpuCount(): number {
+  try {
+    const cpuinfo = fs.readFileSync(`${PROC_PATH}/cpuinfo`, 'utf8');
+    return (cpuinfo.match(/^processor/gm) || []).length || 1;
+  } catch {
+    return 1;
+  }
+}
+
+function getUptime(): number {
+  try {
+    return parseFloat(fs.readFileSync(`${PROC_PATH}/uptime`, 'utf8').split(' ')[0]);
+  } catch {
+    return 0;
+  }
+}
+
 export const GET: APIRoute = async () => {
   try {
-    const output = execSync(
-      'ps aux --sort=-%cpu | head -6 | tail -5',
-      { encoding: 'utf8', timeout: 5000 }
-    );
-
-    const processes: Process[] = output
-      .trim()
-      .split('\n')
-      .map(line => {
-        const parts = line.trim().split(/\s+/);
-        return {
-          pid: parts[1],
-          cpu: parseFloat(parts[2]) || 0,
-          mem: parseFloat(parts[3]) || 0,
-          name: parts.slice(10).join(' ').split('/').pop()?.substring(0, 20) || parts[10]
-        };
-      });
-
+    const processes = getProcesses();
     return new Response(JSON.stringify(processes), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
