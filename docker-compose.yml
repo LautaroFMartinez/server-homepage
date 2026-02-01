@@ -1,0 +1,26 @@
+services:
+  homepage:
+    build: .
+    container_name: lau-homepage
+    restart: unless-stopped
+    ports:
+      - "4321:4321"
+    volumes:
+      # Mount docker socket to control containers
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount /proc and /sys for system metrics (read-only)
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    environment:
+      - NODE_ENV=production
+      # Cloudflare API token (optional)
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN:-}
+    # Run as root to access docker socket
+    # For better security, add your user to the docker group
+    user: root
+    networks:
+      - nginxreverseproxy_default
+
+networks:
+  nginxreverseproxy_default:
+    external: true
