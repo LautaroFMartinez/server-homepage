@@ -9,6 +9,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
+      - /home/lau:/host/home:rw
     environment:
       - NODE_ENV=production
       - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN:-}
