@@ -11,6 +11,8 @@ import Toast from '../components/Toast.svelte';
 import CommandPalette from '../components/CommandPalette.svelte';
 import QuickNotes from '../components/QuickNotes.svelte';
 import Uptime from '../components/Uptime.svelte';
+import CameraFix from '../components/CameraFix.svelte';
+import FileExplorer from '../components/FileExplorer.svelte';
 import { services, QUICK_ACCESS_COUNT } from '../config/services';
 
 const quickAccess = services.slice(0, QUICK_ACCESS_COUNT);
@@ -60,8 +62,11 @@ const otherServices = services.slice(QUICK_ACCESS_COUNT);
         <div class="lg:col-span-1 space-y-6">
           <DockerContainers client:load />
           <Speedtest client:load />
+          <CloudflareMetrics client:load />
+          <CameraFix client:load />
+          <FileExplorer client:load />
         </div>
-
+        
         <div class="space-y-6">
           <div class="glass rounded-xl p-6">
             <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -73,11 +78,10 @@ const otherServices = services.slice(QUICK_ACCESS_COUNT);
             </h2>
             <DraggableServices services={otherServices} storageKey="other-services-order" client:load />
           </div>
-
-          <CloudflareMetrics client:load />
+          
         </div>
       </div>
-
+      
       <footer class="text-center py-4 text-gray-600 text-xs">
         <p>Running on Docker</p>
       </footer>
