@@ -75,6 +75,43 @@ export const services: Service[] = [
     color: 'blue',
     description: 'VPN segura'
   }
+  ,
+    {
+      name: 'Sonarr',
+      url: 'https://sonarr.lau.ar',
+      icon: '\u{1F4FA}',
+      color: 'cyan',
+      description: 'Gestion de series de TV'
+    },
+    {
+      name: 'Radarr',
+      url: 'https://radarr.lau.ar',
+      icon: '\u{1F3AC}',
+      color: 'yellow',
+      description: 'Gestion de peliculas'
+    },
+    {
+      name: 'Bazarr',
+      url: 'https://bazarr.lau.ar',
+      icon: '\u{1F4DD}',
+      color: 'green',
+      description: 'Gestion de subtitulos'
+    },
+    {
+      name: 'Jellyfin',
+      url: 'https://jellyfin.lau.ar',
+      icon: '\u{1F3A5}',
+      color: 'purple',
+      description: 'Media server'
+    }
+    ,
+      {
+        name: 'Prowlarr',
+        url: 'https://prowlarr.lau.ar',
+        icon: '\u{1F50D}',
+        color: 'orange',
+        description: 'Gestion de indexadores'
+      }
 ];
 
 export const QUICK_ACCESS_COUNT = 3;
